@@ -17,7 +17,7 @@ case "${1:-}" in
         echo "war залит."
         ;;
     db-reset)
-        ssh helios "psql -h pg -d studs -v ON_ERROR_STOP=1 -q -f -" < sql/schema.sql
+        ssh helios "psql -h pg -d studs -v ON_ERROR_STOP=1 -1 -q -f -" < sql/schema.sql
         echo "БД пересоздана."
         ;;
 esac

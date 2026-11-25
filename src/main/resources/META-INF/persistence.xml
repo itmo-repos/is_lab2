@@ -20,7 +20,7 @@
             <property name="eclipselink.weaving" value="false"/>
             <property name="eclipselink.target-server" value="JBoss"/>
             <property name="eclipselink.logging.level.sql" value="FINE"/>
-            <property name="eclipselink.logging.parameters" value="true"/>
+            <property name="eclipselink.logging.parameters" value="false"/>
         </properties>
     </persistence-unit>
 </persistence>

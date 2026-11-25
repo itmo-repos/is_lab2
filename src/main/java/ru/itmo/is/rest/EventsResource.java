@@ -9,6 +9,7 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.sse.Sse;
 import jakarta.ws.rs.sse.SseEventSink;
+import ru.itmo.is.auth.SessionEventStreams;
 import ru.itmo.is.event.ChangeNotifier;
 
 @Path("/events")
@@ -18,9 +19,13 @@ public class EventsResource {
     @Inject
     ChangeNotifier notifier;
 
+    @Inject
+    SessionEventStreams streams;
+
     @GET
     @Produces(MediaType.SERVER_SENT_EVENTS)
     public void subscribe(@Context Sse sse, @Context SseEventSink sink) {
+        streams.add(sink);
         notifier.subscribe(sse, sink);
     }
 }

@@ -1,5 +1,7 @@
 -- PostgreSQL
 
+DROP TABLE IF EXISTS is_lab2_account;
+
 DROP TABLE IF EXISTS is_lab1_lab_work CASCADE;
 DROP TABLE IF EXISTS is_lab1_person CASCADE;
 DROP TABLE IF EXISTS is_lab1_location CASCADE;
@@ -51,3 +53,11 @@ CREATE TABLE is_lab1_lab_work (
 
 CREATE INDEX is_lab1_idx_lab_work_discipline ON is_lab1_lab_work (discipline_id);
 CREATE INDEX is_lab1_idx_lab_work_author ON is_lab1_lab_work (author_id);
+
+CREATE TABLE is_lab2_account (
+    id BIGSERIAL PRIMARY KEY,
+    username VARCHAR(32) NOT NULL UNIQUE CHECK (username ~ '^[a-z0-9_.-]{3,32}$'),
+    salt BYTEA NOT NULL CHECK (octet_length(salt) = 16),
+    password_hash BYTEA NOT NULL CHECK (octet_length(password_hash) = 32),
+    role VARCHAR(5) NOT NULL DEFAULT 'USER' CHECK (role IN ('USER', 'ADMIN'))
+);

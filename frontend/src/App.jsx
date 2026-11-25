@@ -4,6 +4,7 @@ import VisualizationPage from './pages/VisualizationPage';
 import ReferencesPage from './pages/ReferencesPage';
 import SpecialPage from './pages/SpecialPage';
 import AuthPage from './pages/AuthPage';
+import ImportHistoryPage from './pages/ImportHistoryPage';
 import { api } from './api';
 
 const ROUTES = [
@@ -11,6 +12,7 @@ const ROUTES = [
   { path: '#/visualization', title: 'Визуализация', page: VisualizationPage },
   { path: '#/references', title: 'Справочники', page: ReferencesPage },
   { path: '#/special', title: 'Спецоперации', page: SpecialPage },
+  { path: '#/imports', title: 'История импорта', page: ImportHistoryPage },
 ];
 
 function useHash() {

@@ -1,5 +1,6 @@
 -- PostgreSQL
 
+DROP TABLE IF EXISTS is_lab2_import_operation;
 DROP TABLE IF EXISTS is_lab2_account;
 
 DROP TABLE IF EXISTS is_lab1_lab_work CASCADE;
@@ -61,3 +62,16 @@ CREATE TABLE is_lab2_account (
     password_hash BYTEA NOT NULL CHECK (octet_length(password_hash) = 32),
     role VARCHAR(5) NOT NULL DEFAULT 'USER' CHECK (role IN ('USER', 'ADMIN'))
 );
+
+CREATE TABLE is_lab2_import_operation (
+    id BIGSERIAL PRIMARY KEY,
+    account_id BIGINT NOT NULL REFERENCES is_lab2_account (id),
+    status VARCHAR(9) NOT NULL CHECK (status IN ('SUCCEEDED', 'FAILED')),
+    added_count INTEGER,
+    CHECK (
+        (status = 'SUCCEEDED' AND added_count IS NOT NULL AND added_count >= 0)
+        OR (status = 'FAILED' AND added_count IS NULL)
+    )
+);
+
+CREATE INDEX is_lab2_idx_import_account ON is_lab2_import_operation (account_id, id);

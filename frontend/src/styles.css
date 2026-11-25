@@ -382,3 +382,124 @@ button.danger {
   padding: 4px 10px;
   font-weight: bold;
 }
+
+.auth-page {
+  position: relative;
+  isolation: isolate;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  justify-items: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 20px 16px;
+  background: #f5f5f5;
+}
+
+.auth-particles {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.auth-header,
+.auth-card {
+  background: rgb(255 255 255 / 60%);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgb(0 0 0 / 40%);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 15%);
+}
+
+.auth-header {
+  padding: 14px 24px;
+  border-radius: 999px;
+  font-weight: 650;
+  text-align: center;
+}
+
+.auth-card {
+  align-self: center;
+  box-sizing: border-box;
+  width: min(100%, 400px);
+  margin: 24px 0;
+  padding: clamp(16px, 6vw, 32px);
+  border-width: 2px;
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgb(0 0 0 / 20%);
+}
+
+.auth-card h1 {
+  margin: 0 0 26px;
+  color: #000;
+  font-size: 24px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.auth-card label {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.auth-card input,
+.auth-buttons button {
+  min-height: 44px;
+  border: 1px solid rgb(0 0 0 / 38%);
+  border-radius: 12px;
+  background: rgb(255 255 255 / 25%);
+  font: inherit;
+}
+
+.auth-card input {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 16px;
+}
+
+.auth-card :is(input, button):focus-visible {
+  outline: 2px solid #075bb5;
+  outline-offset: 2px;
+}
+
+.auth-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.auth-buttons button {
+  padding: 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.auth-buttons button.primary {
+  background: #0968cc;
+  border-color: #0968cc;
+}
+
+.auth-buttons button.primary:hover:not(:disabled) {
+  background: #0756a8;
+}
+
+.auth-feedback {
+  margin: 12px 0 0;
+  font-size: 14px;
+  line-height: 1.45;
+  text-align: center;
+}
+
+.menu-account {
+  display: grid;
+  gap: 10px;
+  padding: 16px 20px;
+  color: #fff;
+  overflow-wrap: anywhere;
+}

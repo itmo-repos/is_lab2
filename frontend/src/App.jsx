@@ -3,6 +3,8 @@ import LabWorksPage from './pages/LabWorksPage';
 import VisualizationPage from './pages/VisualizationPage';
 import ReferencesPage from './pages/ReferencesPage';
 import SpecialPage from './pages/SpecialPage';
+import AuthPage from './pages/AuthPage';
+import { api } from './api';
 
 const ROUTES = [
   { path: '#/labworks', title: 'Лабораторные', page: LabWorksPage },
@@ -22,7 +24,56 @@ function useHash() {
 }
 
 export default function App() {
+  const [account, setAccount] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [sessionError, setSessionError] = useState('');
+  const [loggingOut, setLoggingOut] = useState(false);
   const hash = useHash();
+
+  useEffect(() => {
+    let active = true;
+    const expire = () => {
+      setAccount(null);
+      setSessionError('');
+    };
+    window.addEventListener('lab-session-expired', expire);
+    api.get('/auth/me').then((user) => {
+      if (active) setAccount(user);
+    }).catch((error) => {
+      if (active && error.status !== 401) setSessionError(error.message);
+    }).finally(() => {
+      if (active) setLoading(false);
+    });
+    return () => {
+      active = false;
+      window.removeEventListener('lab-session-expired', expire);
+    };
+  }, []);
+
+  async function logout() {
+    setLoggingOut(true);
+    setSessionError('');
+    try {
+      await api.post('/auth/logout');
+      setAccount(null);
+    } catch (error) {
+      if (error.status === 401) setAccount(null);
+      else setSessionError(error.message);
+    } finally {
+      setLoggingOut(false);
+    }
+  }
+
+  if (loading) return <main>Загрузка…</main>;
+  if (!account) {
+    return (
+      <AuthPage sessionError={sessionError} onLogin={(user) => {
+        setSessionError('');
+        setAccount(user);
+      }} />
+    );
+  }
+
   const route = ROUTES.find((r) => r.path === hash) ?? ROUTES[0];
   const Page = route.page;
 
@@ -34,8 +85,13 @@ export default function App() {
             {r.title}
           </a>
         ))}
+        <div className="menu-account">
+          <span>{account.username} · {account.role === 'ADMIN' ? 'Администратор' : 'Пользователь'}</span>
+          <button disabled={loggingOut} onClick={logout}>Выйти</button>
+        </div>
       </nav>
       <main>
+        {sessionError && <p className="error" role="alert">{sessionError}</p>}
         <Page />
       </main>
     </div>

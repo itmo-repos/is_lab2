@@ -24,7 +24,14 @@ export function subscribe(listener) {
     connect();
   }
   listeners.add(listener);
-  return () => listeners.delete(listener);
+  return () => {
+    listeners.delete(listener);
+    if (listeners.size === 0) {
+      source.close();
+      source = null;
+      opened = false;
+    }
+  };
 }
 
 export function useChanges(callback) {

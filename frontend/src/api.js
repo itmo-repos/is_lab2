@@ -11,7 +11,10 @@ export class ApiError extends Error {
 async function request(method, path, body) {
   const response = await fetch(BASE + path, {
     method,
-    headers: body === undefined ? {} : { 'Content-Type': 'application/json' },
+    headers: {
+      ...(method === 'GET' ? {} : { 'X-Lab-Request': '1' }),
+      ...(body === undefined ? {} : { 'Content-Type': 'application/json' }),
+    },
     body: body === undefined ? undefined : JSON.stringify(body),
   });
   if (response.status === 204) {
@@ -25,6 +28,9 @@ async function request(method, path, body) {
     data = null;
   }
   if (!response.ok) {
+    if (response.status === 401 && !path.startsWith('/auth/')) {
+      window.dispatchEvent(new Event('lab-session-expired'));
+    }
     throw toError(response.status, data);
   }
   return data;

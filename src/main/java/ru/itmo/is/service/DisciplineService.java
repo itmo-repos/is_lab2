@@ -62,7 +62,7 @@ public class DisciplineService {
 
     @Transactional
     public void delete(Long id, Long replaceWith) {
-        uniquenessLock.acquire();
+        uniquenessLock.acquire(UniquenessLock.Rule.DRAFT);
         Discipline entity = findOrThrow(id);
         List<LabWork> labWorks = labWorkRepository.findByDiscipline(entity);
         if (!labWorks.isEmpty()) {

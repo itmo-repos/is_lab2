@@ -5,25 +5,31 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Status;
 import jakarta.transaction.Synchronization;
 import jakarta.transaction.TransactionSynchronizationRegistry;
+import java.util.Map;
 import java.util.concurrent.Semaphore;
 
 @ApplicationScoped
 public class UniquenessLock {
 
-    private final Semaphore permit = new Semaphore(1, true);
+    public enum Rule { DRAFT, UNNAMED_LOCATION }
+
+    private final Map<Rule, Semaphore> permits = Map.of(
+            Rule.DRAFT, new Semaphore(1, true),
+            Rule.UNNAMED_LOCATION, new Semaphore(1, true)
+    );
 
     @Resource(lookup = "java:comp/TransactionSynchronizationRegistry")
     TransactionSynchronizationRegistry transactions;
 
-    public void acquire() {
+    public void acquire(Rule rule) {
         if (transactions.getTransactionStatus() != Status.STATUS_ACTIVE) {
             throw new IllegalStateException("Для проверки уникальности нужна активная транзакция");
         }
-        if (transactions.getResource(UniquenessLock.class) != null) { // Если в этой транзакции уже захватили, выходим
+        if (transactions.getResource(rule) != null) {
             return;
         }
 
-        // Ждем пока освободят или занимаем
+        Semaphore permit = permits.get(rule);
         permit.acquireUninterruptibly();
         try {
             transactions.registerInterposedSynchronization(new Synchronization() {
@@ -35,11 +41,11 @@ public class UniquenessLock {
                 public void afterCompletion(int status) {
                     permit.release();
                 }
-            }); // Когда транзакция завершится отпускаем  permit
+            });
         } catch (RuntimeException e) {
             permit.release();
             throw e;
         }
-        transactions.putResource(UniquenessLock.class, Boolean.TRUE);
+        transactions.putResource(rule, Boolean.TRUE);
     }
 }

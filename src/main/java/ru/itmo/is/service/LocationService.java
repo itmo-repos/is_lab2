@@ -8,6 +8,7 @@ import jakarta.ws.rs.NotFoundException;
 import java.util.List;
 import ru.itmo.is.dto.LocationDto;
 import ru.itmo.is.event.ChangedEvent;
+import ru.itmo.is.exception.ConflictException;
 import ru.itmo.is.model.Location;
 import ru.itmo.is.repository.LocationRepository;
 
@@ -18,10 +19,14 @@ public class LocationService {
     LocationRepository repository;
 
     @Inject
+    UniquenessLock uniquenessLock;
+
+    @Inject
     Event<ChangedEvent> changes;
 
     @Transactional
     public LocationDto create(LocationDto dto) {
+        uniquenessLock.acquire(UniquenessLock.Rule.UNNAMED_LOCATION);
         Location entity = new Location();
         fill(entity, dto);
         repository.save(entity);
@@ -39,6 +44,7 @@ public class LocationService {
 
     @Transactional
     public LocationDto update(Long id, LocationDto dto) {
+        uniquenessLock.acquire(UniquenessLock.Rule.UNNAMED_LOCATION);
         Location entity = findOrThrow(id);
         fill(entity, dto);
         changes.fire(new ChangedEvent("location"));
@@ -60,9 +66,13 @@ public class LocationService {
     }
 
     private void fill(Location entity, LocationDto dto) {
+        String name = dto.name() == null || dto.name().isBlank() ? null : dto.name();
+        if (name == null && repository.hasOtherUnnamed(entity.getId(), dto.x(), dto.y())) {
+            throw new ConflictException("Локация без названия с такими координатами уже существует");
+        }
         entity.setX(dto.x());
         entity.setY(dto.y());
-        entity.setName(dto.name() == null || dto.name().isBlank() ? null : dto.name());
+        entity.setName(name);
     }
 
     public LocationDto toDto(Location entity) {

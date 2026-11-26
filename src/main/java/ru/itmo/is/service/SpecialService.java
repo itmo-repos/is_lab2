@@ -81,7 +81,7 @@ public class SpecialService {
 
     @Transactional
     public LabWorkDto removeFromDiscipline(Long disciplineId, Integer labWorkId) {
-        uniquenessLock.acquire();
+        uniquenessLock.acquire(UniquenessLock.Rule.DRAFT);
         Discipline discipline = disciplineRepository.find(disciplineId);
         if (discipline == null) {
             throw new NotFoundException("Discipline " + disciplineId + " не найдена");

@@ -57,7 +57,7 @@ public class LabWorkService {
 
     @Transactional
     public LabWorkDto create(LabWorkDto dto) {
-        uniquenessLock.acquire();
+        uniquenessLock.acquire(UniquenessLock.Rule.DRAFT);
         LabWork entity = new LabWork();
         fill(entity, dto);
         repository.save(entity);
@@ -95,7 +95,7 @@ public class LabWorkService {
 
     @Transactional
     public LabWorkDto update(Integer id, LabWorkDto dto) {
-        uniquenessLock.acquire();
+        uniquenessLock.acquire(UniquenessLock.Rule.DRAFT);
         LabWork entity = findOrThrow(id);
         fill(entity, dto);
         changes.fire(new ChangedEvent("labwork"));
@@ -104,7 +104,7 @@ public class LabWorkService {
 
     @Transactional
     public void delete(Integer id) {
-        uniquenessLock.acquire();
+        uniquenessLock.acquire(UniquenessLock.Rule.DRAFT);
         repository.delete(findOrThrow(id));
         changes.fire(new ChangedEvent("labwork"));
     }

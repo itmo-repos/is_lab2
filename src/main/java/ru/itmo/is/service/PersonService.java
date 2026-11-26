@@ -71,7 +71,7 @@ public class PersonService {
 
     @Transactional
     public void delete(Long id, Long replaceWith) {
-        uniquenessLock.acquire();
+        uniquenessLock.acquire(UniquenessLock.Rule.DRAFT);
         Person entity = findOrThrow(id);
         List<LabWork> labWorks = labWorkRepository.findByAuthor(entity);
         if (!labWorks.isEmpty()) {

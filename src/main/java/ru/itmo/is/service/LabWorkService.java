@@ -11,8 +11,12 @@ import ru.itmo.is.dto.LabWorkDetailsDto;
 import ru.itmo.is.dto.LabWorkDto;
 import ru.itmo.is.dto.PageDto;
 import ru.itmo.is.event.ChangedEvent;
+import ru.itmo.is.exception.ConflictException;
 import ru.itmo.is.exception.FieldException;
+import ru.itmo.is.model.Coordinates;
+import ru.itmo.is.model.Discipline;
 import ru.itmo.is.model.LabWork;
+import ru.itmo.is.model.Person;
 import ru.itmo.is.repository.BaseRepository;
 import ru.itmo.is.repository.CoordinatesRepository;
 import ru.itmo.is.repository.DisciplineRepository;
@@ -46,10 +50,14 @@ public class LabWorkService {
     PersonService personService;
 
     @Inject
+    UniquenessLock uniquenessLock;
+
+    @Inject
     Event<ChangedEvent> changes;
 
     @Transactional
     public LabWorkDto create(LabWorkDto dto) {
+        uniquenessLock.acquire();
         LabWork entity = new LabWork();
         fill(entity, dto);
         repository.save(entity);
@@ -87,6 +95,7 @@ public class LabWorkService {
 
     @Transactional
     public LabWorkDto update(Integer id, LabWorkDto dto) {
+        uniquenessLock.acquire();
         LabWork entity = findOrThrow(id);
         fill(entity, dto);
         changes.fire(new ChangedEvent("labwork"));
@@ -95,8 +104,15 @@ public class LabWorkService {
 
     @Transactional
     public void delete(Integer id) {
+        uniquenessLock.acquire();
         repository.delete(findOrThrow(id));
         changes.fire(new ChangedEvent("labwork"));
+    }
+
+    void requireUniqueDraft(Integer id, Long authorId, Long disciplineId, Float minimalPoint) {
+        if (minimalPoint == null && disciplineId != null && repository.hasOtherDraft(id, authorId, disciplineId)) {
+            throw new ConflictException("У автора уже есть черновик по этой дисциплине");
+        }
     }
 
     private LabWork findOrThrow(Integer id) {
@@ -108,16 +124,20 @@ public class LabWorkService {
     }
 
     private void fill(LabWork entity, LabWorkDto dto) {
+        Coordinates coordinates = requireRef(coordinatesRepository, dto.coordinatesId(), "coordinatesId");
+        Discipline discipline = dto.disciplineId() == null ? null
+                : requireRef(disciplineRepository, dto.disciplineId(), "disciplineId");
+        Person author = requireRef(personRepository, dto.authorId(), "authorId");
+        requireUniqueDraft(entity.getId(), dto.authorId(), dto.disciplineId(), dto.minimalPoint()); // Если это черновик, то хотя бы уникальный
+
         entity.setName(dto.name());
-        entity.setCoordinates(requireRef(coordinatesRepository, dto.coordinatesId(), "coordinatesId"));
+        entity.setCoordinates(coordinates);
         entity.setDescription(dto.description());
         entity.setDifficulty(dto.difficulty());
-        entity.setDiscipline(dto.disciplineId() == null
-                ? null
-                : requireRef(disciplineRepository, dto.disciplineId(), "disciplineId"));
+        entity.setDiscipline(discipline);
         entity.setMinimalPoint(dto.minimalPoint());
         entity.setPersonalQualitiesMinimum(dto.personalQualitiesMinimum());
-        entity.setAuthor(requireRef(personRepository, dto.authorId(), "authorId"));
+        entity.setAuthor(author);
     }
 
     private <T> T requireRef(BaseRepository<T, Long> refRepository, Long id, String field) {

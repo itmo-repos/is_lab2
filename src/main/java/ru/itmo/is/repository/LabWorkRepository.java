@@ -62,6 +62,21 @@ public class LabWorkRepository extends BaseRepository<LabWork, Integer> {
                 .getResultList();
     }
 
+    public boolean hasOtherDraft(Integer excludedId, Long authorId, Long disciplineId) {
+        String jpql = """
+                SELECT l.id FROM LabWork l
+                WHERE l.author.id = :authorId AND l.discipline.id = :disciplineId
+                    AND l.minimalPoint IS NULL
+                """;
+        var query = em.createQuery(jpql + (excludedId == null ? "" : " AND l.id <> :excludedId"), Integer.class)
+                .setParameter("authorId", authorId)
+                .setParameter("disciplineId", disciplineId);
+        if (excludedId != null) {
+            query.setParameter("excludedId", excludedId);
+        }
+        return !query.setMaxResults(1).getResultList().isEmpty();
+    }
+
     public List<LabWork> findByAuthor(Person author) {
         return em.createQuery("SELECT l FROM LabWork l WHERE l.author = :author", LabWork.class)
                 .setParameter("author", author)

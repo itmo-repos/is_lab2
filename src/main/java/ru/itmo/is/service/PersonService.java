@@ -5,7 +5,9 @@ import jakarta.enterprise.event.Event;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.NotFoundException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import ru.itmo.is.dto.PersonDetailsDto;
 import ru.itmo.is.dto.PersonDto;
 import ru.itmo.is.event.ChangedEvent;
@@ -31,7 +33,13 @@ public class PersonService {
     LabWorkRepository labWorkRepository;
 
     @Inject
+    LabWorkService labWorkService;
+
+    @Inject
     LocationService locationService;
+
+    @Inject
+    UniquenessLock uniquenessLock;
 
     @Inject
     Event<ChangedEvent> changes;
@@ -63,6 +71,7 @@ public class PersonService {
 
     @Transactional
     public void delete(Long id, Long replaceWith) {
+        uniquenessLock.acquire();
         Person entity = findOrThrow(id);
         List<LabWork> labWorks = labWorkRepository.findByAuthor(entity);
         if (!labWorks.isEmpty()) {
@@ -74,6 +83,16 @@ public class PersonService {
                 throw new FieldException("replaceWith", "Нельзя заменить автора на него же");
             }
             Person replacement = findOrThrow(replaceWith);
+            Set<Long> draftDisciplines = new HashSet<>(); // Проверяем что смена автора не создаст неконсистентное состояние
+            for (LabWork labWork : labWorks) {
+                if (labWork.getMinimalPoint() == null && labWork.getDiscipline() != null) {
+                    Long disciplineId = labWork.getDiscipline().getId();
+                    if (!draftDisciplines.add(disciplineId)) {
+                        throw new ConflictException("Замена автора приведёт к появлению нескольких черновиков по одной дисциплине");
+                    }
+                    labWorkService.requireUniqueDraft(labWork.getId(), replacement.getId(), disciplineId, null);
+                }
+            }
             labWorks.forEach(labWork -> labWork.setAuthor(replacement));
             changes.fire(new ChangedEvent("labwork"));
         }

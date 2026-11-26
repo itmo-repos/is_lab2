@@ -33,6 +33,9 @@ public class SpecialService {
     LabWorkService labWorkService;
 
     @Inject
+    UniquenessLock uniquenessLock;
+
+    @Inject
     Event<ChangedEvent> changes;
 
     public AverageDto averageMinimalPoint() {
@@ -78,6 +81,7 @@ public class SpecialService {
 
     @Transactional
     public LabWorkDto removeFromDiscipline(Long disciplineId, Integer labWorkId) {
+        uniquenessLock.acquire();
         Discipline discipline = disciplineRepository.find(disciplineId);
         if (discipline == null) {
             throw new NotFoundException("Discipline " + disciplineId + " не найдена");

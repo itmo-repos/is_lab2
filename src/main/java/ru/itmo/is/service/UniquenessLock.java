@@ -11,11 +11,12 @@ import java.util.concurrent.Semaphore;
 @ApplicationScoped
 public class UniquenessLock {
 
-    public enum Rule { DRAFT, UNNAMED_LOCATION }
+    public enum Rule { DRAFT, UNNAMED_LOCATION, PERSON }
 
     private final Map<Rule, Semaphore> permits = Map.of(
             Rule.DRAFT, new Semaphore(1, true),
-            Rule.UNNAMED_LOCATION, new Semaphore(1, true)
+            Rule.UNNAMED_LOCATION, new Semaphore(1, true),
+            Rule.PERSON, new Semaphore(1, true)
     );
 
     @Resource(lookup = "java:comp/TransactionSynchronizationRegistry")

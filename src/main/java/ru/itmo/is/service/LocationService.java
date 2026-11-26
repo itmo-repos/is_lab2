@@ -11,12 +11,16 @@ import ru.itmo.is.event.ChangedEvent;
 import ru.itmo.is.exception.ConflictException;
 import ru.itmo.is.model.Location;
 import ru.itmo.is.repository.LocationRepository;
+import ru.itmo.is.repository.PersonRepository;
 
 @ApplicationScoped
 public class LocationService {
 
     @Inject
     LocationRepository repository;
+
+    @Inject
+    PersonRepository personRepository;
 
     @Inject
     UniquenessLock uniquenessLock;
@@ -53,7 +57,13 @@ public class LocationService {
 
     @Transactional
     public void delete(Long id) {
-        repository.delete(findOrThrow(id));
+        uniquenessLock.acquire(UniquenessLock.Rule.PERSON);
+        Location location = findOrThrow(id);
+        if (personRepository.hasDuplicateAfterLocationRemoval(location)) {
+            throw new ConflictException("Удаление локации приведёт к появлению людей с одинаковыми данными");
+        }
+        personRepository.findByLocation(location).forEach(person -> person.setLocation(null));
+        repository.delete(location);
         changes.fire(new ChangedEvent("location"));
     }
 

@@ -46,6 +46,7 @@ public class PersonService {
 
     @Transactional
     public PersonDto create(PersonDto dto) {
+        uniquenessLock.acquire(UniquenessLock.Rule.PERSON);
         Person entity = new Person();
         fill(entity, dto);
         repository.save(entity);
@@ -63,6 +64,7 @@ public class PersonService {
 
     @Transactional
     public PersonDto update(Long id, PersonDto dto) {
+        uniquenessLock.acquire(UniquenessLock.Rule.PERSON);
         Person entity = findOrThrow(id);
         fill(entity, dto);
         changes.fire(new ChangedEvent("person"));
@@ -109,10 +111,15 @@ public class PersonService {
     }
 
     private void fill(Person entity, PersonDto dto) {
+        Location location = findLocation(dto.locationId());
+        if (repository.hasDuplicate(entity.getId(), dto, location)) {
+            throw new ConflictException("Человек с такими данными уже существует");
+        }
+
         entity.setName(dto.name());
         entity.setEyeColor(dto.eyeColor());
         entity.setHairColor(dto.hairColor());
-        entity.setLocation(findLocation(dto.locationId()));
+        entity.setLocation(location);
         entity.setHeight(dto.height());
         entity.setNationality(dto.nationality());
     }

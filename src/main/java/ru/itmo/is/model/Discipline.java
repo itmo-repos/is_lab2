@@ -9,7 +9,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 
 @Entity
-@Table(name = "is_lab1_discipline")
+@Table(name = "is_lab2_discipline")
 public class Discipline {
 
     @Id

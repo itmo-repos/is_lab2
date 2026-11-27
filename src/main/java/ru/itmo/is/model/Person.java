@@ -15,7 +15,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
 @Entity
-@Table(name = "is_lab1_person")
+@Table(name = "is_lab2_person")
 public class Person {
 
     @Id

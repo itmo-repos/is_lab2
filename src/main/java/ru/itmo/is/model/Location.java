@@ -9,7 +9,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 
 @Entity
-@Table(name = "is_lab1_location")
+@Table(name = "is_lab2_location")
 public class Location {
 
     @Id

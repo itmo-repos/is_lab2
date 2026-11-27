@@ -4,7 +4,7 @@ LOCAL_PORT="${LOCAL_PORT:-8080}"
 PORT="${PORT:-46701}"
 PORT_2=$((PORT + 1))
 
-echo "Приложение:     http://localhost:$LOCAL_PORT/is_lab1/"
+echo "Приложение:     http://localhost:$LOCAL_PORT/is_lab2/"
 echo "Консоль WildFly: http://localhost:9990/"
 echo "Ctrl+C для остановки."
 

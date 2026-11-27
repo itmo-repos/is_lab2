@@ -17,7 +17,7 @@ public class AccountService {
 
     private final SecureRandom random = new SecureRandom();
 
-    @PersistenceContext(unitName = "lab1")
+    @PersistenceContext(unitName = "lab2")
     EntityManager em;
 
     @Transactional

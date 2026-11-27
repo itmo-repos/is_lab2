@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>ru.itmo.is</groupId>
-    <artifactId>is_lab1</artifactId>
+    <artifactId>is_lab2</artifactId>
     <version>1.0.0</version>
     <packaging>war</packaging>
 
@@ -49,7 +49,7 @@
     </dependencies>
 
     <build>
-        <finalName>is_lab1</finalName>
+        <finalName>is_lab2</finalName>
         <plugins>
             <!-- Кладем фронт в war -->
             <plugin>

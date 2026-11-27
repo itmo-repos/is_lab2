@@ -6,7 +6,7 @@ import java.util.List;
 
 public abstract class BaseRepository<T, ID> {
 
-    @PersistenceContext(unitName = "lab1")
+    @PersistenceContext(unitName = "lab2")
     protected EntityManager em;
 
     private final Class<T> entityClass;

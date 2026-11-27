@@ -1,7 +1,7 @@
 set -euo pipefail
 
 PORT="${PORT:-46701}"
-WAR="${WAR:-target/is_lab1.war}"
+WAR="${WAR:-target/is_lab2.war}"
 
 case "${1:-}" in
     start)
@@ -12,8 +12,8 @@ case "${1:-}" in
         ;;
     deploy)
         [[ -f "$WAR" ]] || { echo "Нет $WAR" >&2; exit 1; }
-        scp "$WAR" helios:wildfly/standalone/deployments/is_lab1.war.part
-        ssh helios "cd wildfly/standalone/deployments && mv is_lab1.war.part is_lab1.war"
+        scp "$WAR" helios:wildfly/standalone/deployments/is_lab2.war.part
+        ssh helios "cd wildfly/standalone/deployments && mv is_lab2.war.part is_lab2.war"
         echo "war залит."
         ;;
     db-reset)

@@ -17,7 +17,7 @@ import jakarta.validation.constraints.Positive;
 import java.time.ZonedDateTime;
 
 @Entity
-@Table(name = "is_lab1_lab_work")
+@Table(name = "is_lab2_lab_work")
 public class LabWork {
 
     @Id

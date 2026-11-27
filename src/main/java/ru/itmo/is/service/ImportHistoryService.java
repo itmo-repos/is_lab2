@@ -14,7 +14,7 @@ import java.util.List;
 @ApplicationScoped
 public class ImportHistoryService {
 
-    @PersistenceContext(unitName = "lab1")
+    @PersistenceContext(unitName = "lab2")
     EntityManager em;
 
     public List<ImportOperationDto> list(Account account) {

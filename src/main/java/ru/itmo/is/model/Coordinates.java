@@ -10,7 +10,7 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotNull;
 
 @Entity
-@Table(name = "is_lab1_coordinates")
+@Table(name = "is_lab2_coordinates")
 public class Coordinates {
 
     @Id

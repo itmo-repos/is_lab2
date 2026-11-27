@@ -4,6 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
+import jakarta.transaction.Transactional;
 import ru.itmo.is.auth.Account;
 import ru.itmo.is.dto.ImportOperationDto;
 
@@ -44,5 +45,28 @@ public class ImportHistoryService {
             ));
         }
         return result;
+    }
+
+    @Transactional(Transactional.TxType.MANDATORY)
+    public ImportOperationDto recordSuccess(Account account, int count) {
+        Number id = (Number) em.createNativeQuery("""
+                INSERT INTO is_lab2_import_operation (account_id, status, added_count)
+                VALUES (?1, 'SUCCEEDED', ?2)
+                RETURNING id
+                """)
+                .setParameter(1, account.id())
+                .setParameter(2, count)
+                .getSingleResult();
+        return new ImportOperationDto(id.longValue(), ImportOperationDto.Status.SUCCEEDED, account.username(), count);
+    }
+
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
+    public void recordFailure(Account account) {
+        em.createNativeQuery("""
+                INSERT INTO is_lab2_import_operation (account_id, status)
+                VALUES (?1, 'FAILED')
+                """)
+                .setParameter(1, account.id())
+                .executeUpdate();
     }
 }

@@ -8,14 +8,14 @@ export class ApiError extends Error {
   }
 }
 
-async function request(method, path, body) {
+async function request(method, path, body, contentType = 'application/json') {
   const response = await fetch(BASE + path, {
     method,
     headers: {
       ...(method === 'GET' ? {} : { 'X-Lab-Request': '1' }),
-      ...(body === undefined ? {} : { 'Content-Type': 'application/json' }),
+      ...(body === undefined ? {} : { 'Content-Type': contentType }),
     },
-    body: body === undefined ? undefined : JSON.stringify(body),
+    body: body === undefined || contentType !== 'application/json' ? body : JSON.stringify(body),
   });
   if (response.status === 204) {
     return null;
@@ -53,6 +53,7 @@ function toError(status, data) {
 export const api = {
   get: (path) => request('GET', path),
   post: (path, body) => request('POST', path, body),
+  upload: (path, file) => request('POST', path, file, 'application/octet-stream'),
   put: (path, body) => request('PUT', path, body),
   delete: (path) => request('DELETE', path),
 };
